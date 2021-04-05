@@ -1,0 +1,24 @@
+{
+  "name": "baixar-video-privado",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "baixar-video-privado": "ts-node ./index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "playwright": "^1.10.0",
+    "slugify": "^1.5.0",
+    "ts-node": "^9.1.1",
+    "ytdl-core": "^4.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.37"
+  }
+}
