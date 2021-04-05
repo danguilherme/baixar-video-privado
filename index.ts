@@ -2,7 +2,7 @@
 import { getCookiesAndDownloadVideo } from "./pw";
 
 const [runner, executable, ...args] = process.argv;
-const [videoUrl] = args;
+const [videoUrl, outputName] = args;
 
 if (!videoUrl) {
   console.log("");
@@ -10,7 +10,7 @@ if (!videoUrl) {
   process.exit(0);
 }
 
-getCookiesAndDownloadVideo(videoUrl).then(
+getCookiesAndDownloadVideo(videoUrl, outputName).then(
   () => console.log("fim"),
   (error) => console.error("Erro: " + error.message)
 );

@@ -1,10 +1,10 @@
-import { Page, firefox, Cookie } from "playwright";
 import fs from "fs";
 import path from "path";
-import { downloadVideo } from "./download";
+import { Cookie, firefox, Page } from "playwright";
 import slugify from "slugify";
 
-const cookiesFileLocation = path.join(__dirname, "cookies.txt");
+import { downloadVideo } from "./download";
+
 const getBaseFileLocation = () => __dirname;
 const getCookieFilePath = (which: CookieType) =>
   path.join(getBaseFileLocation(), `${which}-cookies.txt`);
@@ -14,13 +14,21 @@ const getCookieFilePath = (which: CookieType) =>
 // }
 // main().catch(console.error);
 
-export async function getCookiesAndDownloadVideo(videoURL: string) {
+export async function getCookiesAndDownloadVideo(
+  videoURL: string,
+  outputName: string
+) {
   const { id, downloadCookiesString, idToken } = await getVideoInformation(
     videoURL
   );
 
   console.log("downloading...");
-  downloadVideo(id, downloadCookiesString, idToken, `${slugify(id)}.mp4`);
+  return downloadVideo(
+    id,
+    downloadCookiesString,
+    idToken,
+    outputName || `${slugify(id)}.mp4`
+  );
 }
 
 async function getVideoInformation(videoURL: string) {
@@ -72,7 +80,7 @@ async function getVideoInformation(videoURL: string) {
 
 type CookieType = "auth" | "download";
 async function getCookies(which: CookieType) {
-  if (fs.existsSync(cookiesFileLocation)) {
+  if (fs.existsSync(getCookieFilePath(which))) {
     return JSON.parse(
       fs.readFileSync(getCookieFilePath(which), "utf-8")
     ) as Cookie[];
