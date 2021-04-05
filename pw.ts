@@ -15,6 +15,15 @@ const getCookieFilePath = (which: CookieType) =>
 // main().catch(console.error);
 
 export async function getCookiesAndDownloadVideo(videoURL: string) {
+  const { id, downloadCookiesString, idToken } = await getVideoInformation(
+    videoURL
+  );
+
+  console.log("downloading...");
+  downloadVideo(id, downloadCookiesString, idToken, `${slugify(id)}.mp4`);
+}
+
+async function getVideoInformation(videoURL: string) {
   const browser = await firefox.launch({
     headless: false,
   });
@@ -27,15 +36,13 @@ export async function getCookiesAndDownloadVideo(videoURL: string) {
   await goToYoutube(page);
 
   console.log("navigate to video");
-  page.goto(videoURL);
+  await page.goto(videoURL);
 
   let cookiesStr = "";
   await page.waitForRequest((request) => {
     const isVideo = request.url().includes("youtube.com/videoplayback");
 
     if (isVideo) {
-      console.log("video playback request");
-      console.log("headers", Object.keys(request.headers()).join(", "));
       cookiesStr = request.headers().cookie;
     }
 
@@ -43,10 +50,9 @@ export async function getCookiesAndDownloadVideo(videoURL: string) {
   });
 
   const url = page.url();
-
   console.log("navigated, url", url);
 
-  const videoId = new URL(url).searchParams.get("v");
+  const videoId = new URL(videoURL).searchParams.get("v");
   console.log("video id", videoId);
 
   const idToken = await page.evaluate<string>(() =>
@@ -54,8 +60,14 @@ export async function getCookiesAndDownloadVideo(videoURL: string) {
   );
   console.log("ID_TOKEN", idToken);
 
-  console.log("downloading...");
-  downloadVideo(videoId, cookiesStr, idToken, `${slugify(videoId)}.mp4`);
+  browser.close();
+
+  return {
+    url: videoURL,
+    id: videoId,
+    downloadCookiesString: cookiesStr,
+    idToken,
+  };
 }
 
 type CookieType = "auth" | "download";

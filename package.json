@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc && chmod +x dist/index.js"
   },
   "bin": {
     "baixar-video-privado": "./dist/index.js"

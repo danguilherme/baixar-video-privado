@@ -56,6 +56,22 @@ var getCookieFilePath = function (which) {
 // main().catch(console.error);
 function getCookiesAndDownloadVideo(videoURL) {
     return __awaiter(this, void 0, void 0, function () {
+        var _a, id, downloadCookiesString, idToken;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0: return [4 /*yield*/, getVideoInformation(videoURL)];
+                case 1:
+                    _a = _b.sent(), id = _a.id, downloadCookiesString = _a.downloadCookiesString, idToken = _a.idToken;
+                    console.log("downloading...");
+                    download_1.downloadVideo(id, downloadCookiesString, idToken, slugify_1.default(id) + ".mp4");
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.getCookiesAndDownloadVideo = getCookiesAndDownloadVideo;
+function getVideoInformation(videoURL) {
+    return __awaiter(this, void 0, void 0, function () {
         var browser, context, _a, _b, page, cookiesStr, url, videoId, idToken;
         return __generator(this, function (_c) {
             switch (_c.label) {
@@ -79,37 +95,40 @@ function getCookiesAndDownloadVideo(videoURL) {
                 case 6:
                     _c.sent();
                     console.log("navigate to video");
-                    page.goto(videoURL);
+                    return [4 /*yield*/, page.goto(videoURL)];
+                case 7:
+                    _c.sent();
                     cookiesStr = "";
                     return [4 /*yield*/, page.waitForRequest(function (request) {
                             var isVideo = request.url().includes("youtube.com/videoplayback");
                             if (isVideo) {
-                                console.log("video playback request");
-                                console.log("headers", Object.keys(request.headers()).join(", "));
                                 cookiesStr = request.headers().cookie;
                             }
                             return isVideo;
                         })];
-                case 7:
+                case 8:
                     _c.sent();
                     url = page.url();
                     console.log("navigated, url", url);
-                    videoId = new URL(url).searchParams.get("v");
+                    videoId = new URL(videoURL).searchParams.get("v");
                     console.log("video id", videoId);
                     return [4 /*yield*/, page.evaluate(function () {
                             return window.ytcfg.get("ID_TOKEN");
                         })];
-                case 8:
+                case 9:
                     idToken = _c.sent();
                     console.log("ID_TOKEN", idToken);
-                    console.log("downloading...");
-                    download_1.downloadVideo(videoId, cookiesStr, idToken, slugify_1.default(videoId) + ".mp4");
-                    return [2 /*return*/];
+                    browser.close();
+                    return [2 /*return*/, {
+                            url: videoURL,
+                            id: videoId,
+                            downloadCookiesString: cookiesStr,
+                            idToken: idToken,
+                        }];
             }
         });
     });
 }
-exports.getCookiesAndDownloadVideo = getCookiesAndDownloadVideo;
 function getCookies(which) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {

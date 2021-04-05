@@ -54,6 +54,10 @@ var videoID = "xWbzTQ-Wt3A";
 var requestOptions = {
     headers: {
         cookie: COOKIE,
+        // Optional. If not given, ytdl-core will try to find it.
+        // You can find this by going to a video's watch page, viewing the source,
+        // and searching for "ID_TOKEN".
+        // 'x-youtube-identity-token': "QUFFLUhqbHFidlEwMUk5QWQwYnVPS2lKeGhiSVd0OXozQXw=",
     },
 };
 ytdl_core_1.default.getInfo(videoID, { requestOptions: requestOptions }).then(function (info) {
