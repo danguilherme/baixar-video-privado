@@ -9,7 +9,12 @@ const getBaseFileLocation = () => __dirname;
 const getCookieFilePath = (which: CookieType) =>
   path.join(getBaseFileLocation(), `${which}-cookies.txt`);
 
-async function main() {
+// async function main() {
+//   getCookiesAndDownloadVideo("https://www.youtube.com/watch?v=xWbzTQ-Wt3A");
+// }
+// main().catch(console.error);
+
+export async function getCookiesAndDownloadVideo(videoURL: string) {
   const browser = await firefox.launch({
     headless: false,
   });
@@ -19,13 +24,11 @@ async function main() {
 
   const page = await context.newPage();
 
-  // https://www.youtube.com/watch?v=xWbzTQ-Wt3A
-  // await goToVideo(page);
-
   await goToYoutube(page);
 
   console.log("navigate to video");
-  // await page.waitForSelector("#secondary #related #items", { timeout: 90000 });
+  page.goto(videoURL);
+
   let cookiesStr = "";
   await page.waitForRequest((request) => {
     const isVideo = request.url().includes("youtube.com/videoplayback");
@@ -51,10 +54,7 @@ async function main() {
   );
   console.log("ID_TOKEN", idToken);
 
-  const cookies = await getCookies("download");
-
   console.log("downloading...");
-  // cookiesStr = cookies.map(({ name, value }) => `${name}=${value}`).join("; ");
   downloadVideo(videoId, cookiesStr, idToken, `${slugify(videoId)}.mp4`);
 }
 
@@ -156,14 +156,16 @@ async function signIn(
   page: Page,
   selectorToWaitFor: string = "#container.ytd-masthead"
 ) {
-  console.log("you have 90s to login");
+  console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+  console.log("você tem 90 segundos para fazer login");
+  console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
   await page.waitForSelector(selectorToWaitFor, { timeout: 90000 });
-  console.log("logged in :)");
+  console.log("logado in :)");
+
   setCookies("auth", await page.context().cookies());
 }
 
 function identity<T>(arg: T): () => T {
   return () => arg;
 }
-
-main().catch(console.error);
