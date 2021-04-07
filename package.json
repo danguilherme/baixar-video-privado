@@ -1,10 +1,11 @@
 {
   "name": "baixar-video-privado",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc && chmod +x dist/index.js"
+    "build": "tsc && chmod +x dist/index.js",
+    "run": "ts-node index.ts"
   },
   "bin": {
     "baixar-video-privado": "./dist/index.js"

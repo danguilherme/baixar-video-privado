@@ -90,7 +90,9 @@ function downloadWithRetry(getVideo, output) {
 function download(video, output) {
     return new Promise(function (resolve, reject) {
         var outputName = output;
-        var outputPath = path_1.default.resolve(__dirname, outputName);
+        var outputDir = process.cwd();
+        console.log("baixando", outputName, "em", outputDir);
+        var outputPath = path_1.default.resolve(outputDir, outputName);
         // const video = ytdl(videoID, { requestOptions });
         var progressBar = null;
         video.on("progress", function (chunkLength, downloaded, total) {

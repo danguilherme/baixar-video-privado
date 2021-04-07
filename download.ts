@@ -55,7 +55,9 @@ async function downloadWithRetry(getVideo: () => any, output: string) {
 function download(video: any, output: string) {
   return new Promise((resolve, reject) => {
     const outputName = output;
-    const outputPath = path.resolve(__dirname, outputName);
+    const outputDir = process.cwd();
+    console.log("baixando", outputName, "em", outputDir);
+    const outputPath = path.resolve(outputDir, outputName);
     // const video = ytdl(videoID, { requestOptions });
 
     let progressBar: cliProgress.SingleBar | null = null;
