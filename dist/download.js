@@ -40,29 +40,35 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.downloadVideo = void 0;
-var ytdl_core_1 = __importDefault(require("ytdl-core"));
-var path_1 = __importDefault(require("path"));
+var cli_progress_1 = __importDefault(require("cli-progress"));
 var fs_1 = __importDefault(require("fs"));
+var path_1 = __importDefault(require("path"));
+var ytdl_core_1 = __importDefault(require("ytdl-core"));
 function downloadVideo(videoId, cookieString, idToken, output) {
-    var requestOptions = {
-        headers: {
-            cookie: cookieString,
-            // Optional. If not given, ytdl-core will try to find it.
-            // You can find this by going to a video's watch page, viewing the source,
-            // and searching for "ID_TOKEN".
-            "x-youtube-identity-token": idToken,
-        },
-    };
-    ytdl_core_1.default.getInfo(videoId, { requestOptions: requestOptions }).then(function (info) {
-        console.log("title:", info.videoDetails.title);
-        console.log("rating:", info.player_response.videoDetails.averageRating);
-        console.log("uploaded by:", info.videoDetails.author.name);
-        var formats = info.formats;
-        var format = ytdl_core_1.default.chooseFormat(formats, {
-            quality: 18,
-        });
-        console.log("format:", format.qualityLabel);
-        downloadWithRetry(function () { return ytdl_core_1.default(videoId, { format: format, requestOptions: requestOptions }); }, output);
+    return new Promise(function (resolve) {
+        var requestOptions = {
+            headers: {
+                cookie: cookieString,
+                // Optional. If not given, ytdl-core will try to find it.
+                // You can find this by going to a video's watch page, viewing the source,
+                // and searching for "ID_TOKEN".
+                "x-youtube-identity-token": idToken,
+            },
+        };
+        ytdl_core_1.default
+            .getInfo(videoId, { requestOptions: requestOptions })
+            .then(function (info) {
+            console.log("title:", info.videoDetails.title);
+            console.log("rating:", info.player_response.videoDetails.averageRating);
+            console.log("uploaded by:", info.videoDetails.author.name);
+            var formats = info.formats;
+            var format = ytdl_core_1.default.chooseFormat(formats, {
+                quality: 18,
+            });
+            console.log("format:", format.qualityLabel);
+            return downloadWithRetry(function () { return ytdl_core_1.default(videoId, { format: format, requestOptions: requestOptions }); }, output);
+        })
+            .then(resolve);
     });
 }
 exports.downloadVideo = downloadVideo;
@@ -71,11 +77,11 @@ function downloadWithRetry(getVideo, output) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             try {
-                download(getVideo(), output);
+                return [2 /*return*/, download(getVideo(), output)];
             }
             catch (error) {
                 console.log("retrying");
-                downloadWithRetry(getVideo(), output);
+                return [2 /*return*/, downloadWithRetry(getVideo(), output)];
             }
             return [2 /*return*/];
         });
@@ -86,22 +92,31 @@ function download(video, output) {
         var outputName = output;
         var outputPath = path_1.default.resolve(__dirname, outputName);
         // const video = ytdl(videoID, { requestOptions });
-        video.on("info", function (info, format) {
-            console.log("title:", info.videoDetails.title);
-            console.log("rating:", info.player_response.videoDetails.averageRating);
-            console.log("uploaded by:", info.videoDetails.author.name);
-            console.log("quality:", format.itag, format.qualityLabel);
-        });
+        var progressBar = null;
         video.on("progress", function (chunkLength, downloaded, total) {
-            var percent = downloaded / total;
-            console.log("downloading", (percent * 100).toFixed(1) + "%");
+            if (progressBar === null) {
+                progressBar = new cli_progress_1.default.SingleBar({
+                    format: outputName + " |" + "{bar}" + "| {percentage}% || {value}/{total}",
+                    barCompleteChar: "\u2588",
+                    barIncompleteChar: "\u2591",
+                    hideCursor: true,
+                });
+                progressBar === null || progressBar === void 0 ? void 0 : progressBar.start(total, 0);
+            }
+            progressBar.update(downloaded);
+            // const percent = downloaded / total;
+            // console.log("downloading", `${(percent * 100).toFixed(1)}%`);
         });
         video.on("error", function (error) {
+            progressBar.stop();
+            progressBar = null;
             console.log("error", error);
             console.log("retrying");
             reject();
         });
         video.on("end", function () {
+            progressBar.stop();
+            progressBar = null;
             console.log("saved to", outputName);
             resolve(undefined);
         });

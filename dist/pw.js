@@ -40,21 +40,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCookiesAndDownloadVideo = void 0;
-var playwright_1 = require("playwright");
 var fs_1 = __importDefault(require("fs"));
 var path_1 = __importDefault(require("path"));
-var download_1 = require("./download");
+var playwright_1 = require("playwright");
 var slugify_1 = __importDefault(require("slugify"));
-var cookiesFileLocation = path_1.default.join(__dirname, "cookies.txt");
+var download_1 = require("./download");
 var getBaseFileLocation = function () { return __dirname; };
 var getCookieFilePath = function (which) {
     return path_1.default.join(getBaseFileLocation(), which + "-cookies.txt");
 };
+var DEFAULT_TIMEOUT = 60000 * 5;
 // async function main() {
 //   getCookiesAndDownloadVideo("https://www.youtube.com/watch?v=xWbzTQ-Wt3A");
 // }
 // main().catch(console.error);
-function getCookiesAndDownloadVideo(videoURL) {
+function getCookiesAndDownloadVideo(videoURL, outputName) {
     return __awaiter(this, void 0, void 0, function () {
         var _a, id, downloadCookiesString, idToken;
         return __generator(this, function (_b) {
@@ -62,9 +62,8 @@ function getCookiesAndDownloadVideo(videoURL) {
                 case 0: return [4 /*yield*/, getVideoInformation(videoURL)];
                 case 1:
                     _a = _b.sent(), id = _a.id, downloadCookiesString = _a.downloadCookiesString, idToken = _a.idToken;
-                    console.log("downloading...");
-                    download_1.downloadVideo(id, downloadCookiesString, idToken, slugify_1.default(id) + ".mp4");
-                    return [2 /*return*/];
+                    console.log("baixando video...");
+                    return [2 /*return*/, download_1.downloadVideo(id, downloadCookiesString, idToken, outputName || slugify_1.default(id) + ".mp4")];
             }
         });
     });
@@ -72,7 +71,7 @@ function getCookiesAndDownloadVideo(videoURL) {
 exports.getCookiesAndDownloadVideo = getCookiesAndDownloadVideo;
 function getVideoInformation(videoURL) {
     return __awaiter(this, void 0, void 0, function () {
-        var browser, context, _a, _b, page, cookiesStr, url, videoId, idToken;
+        var browser, context, _a, _b, page, cookiesStr, cookiePromise, url, videoId, idToken;
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0: return [4 /*yield*/, playwright_1.firefox.launch({
@@ -88,28 +87,31 @@ function getVideoInformation(videoURL) {
                 case 3: return [4 /*yield*/, _b.apply(_a, [_c.sent()])];
                 case 4:
                     _c.sent();
+                    context.setDefaultTimeout(DEFAULT_TIMEOUT);
                     return [4 /*yield*/, context.newPage()];
                 case 5:
                     page = _c.sent();
                     return [4 /*yield*/, goToYoutube(page)];
                 case 6:
                     _c.sent();
-                    console.log("navigate to video");
+                    cookiesStr = "";
+                    cookiePromise = page.waitForRequest(function (request) {
+                        var isVideo = request.url().includes("youtube.com/videoplayback");
+                        if (isVideo) {
+                            cookiesStr = request.headers().cookie;
+                        }
+                        return isVideo;
+                    });
+                    console.log("navegando para o video");
                     return [4 /*yield*/, page.goto(videoURL)];
                 case 7:
                     _c.sent();
-                    cookiesStr = "";
-                    return [4 /*yield*/, page.waitForRequest(function (request) {
-                            var isVideo = request.url().includes("youtube.com/videoplayback");
-                            if (isVideo) {
-                                cookiesStr = request.headers().cookie;
-                            }
-                            return isVideo;
-                        })];
+                    console.log("navegado, carregando video");
+                    return [4 /*yield*/, cookiePromise];
                 case 8:
                     _c.sent();
                     url = page.url();
-                    console.log("navigated, url", url);
+                    console.log("url", url);
                     videoId = new URL(videoURL).searchParams.get("v");
                     console.log("video id", videoId);
                     return [4 /*yield*/, page.evaluate(function () {
@@ -132,7 +134,7 @@ function getVideoInformation(videoURL) {
 function getCookies(which) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
-            if (fs_1.default.existsSync(cookiesFileLocation)) {
+            if (fs_1.default.existsSync(getCookieFilePath(which))) {
                 return [2 /*return*/, JSON.parse(fs_1.default.readFileSync(getCookieFilePath(which), "utf-8"))];
             }
             return [2 /*return*/, []];
@@ -261,17 +263,18 @@ function goToVideo(page, url) {
 function signIn(page, selectorToWaitFor) {
     if (selectorToWaitFor === void 0) { selectorToWaitFor = "#container.ytd-masthead"; }
     return __awaiter(this, void 0, void 0, function () {
-        var _a, _b;
+        var minutes, _a, _b;
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
-                    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    console.log("você tem 90 segundos para fazer login");
-                    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    return [4 /*yield*/, page.waitForSelector(selectorToWaitFor, { timeout: 90000 })];
+                    minutes = DEFAULT_TIMEOUT / 60000;
+                    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    console.log("voc\u00EA tem " + minutes + " minutos para fazer login");
+                    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    return [4 /*yield*/, page.waitForSelector(selectorToWaitFor)];
                 case 1:
                     _c.sent();
-                    console.log("logado in :)");
+                    console.log("logado :)");
                     _a = setCookies;
                     _b = ["auth"];
                     return [4 /*yield*/, page.context().cookies()];

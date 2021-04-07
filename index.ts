@@ -10,6 +10,7 @@ if (!videoUrl) {
   process.exit(0);
 }
 
+console.log("carregando...");
 getCookiesAndDownloadVideo(videoUrl, outputName).then(
   () => console.log("fim"),
   (error) => console.error("Erro: " + error.message)

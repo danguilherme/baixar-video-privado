@@ -9,6 +9,8 @@ const getBaseFileLocation = () => __dirname;
 const getCookieFilePath = (which: CookieType) =>
   path.join(getBaseFileLocation(), `${which}-cookies.txt`);
 
+const DEFAULT_TIMEOUT = 60000 * 5;
+
 // async function main() {
 //   getCookiesAndDownloadVideo("https://www.youtube.com/watch?v=xWbzTQ-Wt3A");
 // }
@@ -22,7 +24,7 @@ export async function getCookiesAndDownloadVideo(
     videoURL
   );
 
-  console.log("downloading...");
+  console.log("baixando video...");
   return downloadVideo(
     id,
     downloadCookiesString,
@@ -38,16 +40,13 @@ async function getVideoInformation(videoURL: string) {
 
   const context = await browser.newContext();
   await context.addCookies(await getCookies("auth"));
+  context.setDefaultTimeout(DEFAULT_TIMEOUT);
 
   const page = await context.newPage();
 
   await goToYoutube(page);
-
-  console.log("navigate to video");
-  await page.goto(videoURL);
-
   let cookiesStr = "";
-  await page.waitForRequest((request) => {
+  const cookiePromise = page.waitForRequest((request) => {
     const isVideo = request.url().includes("youtube.com/videoplayback");
 
     if (isVideo) {
@@ -57,8 +56,13 @@ async function getVideoInformation(videoURL: string) {
     return isVideo;
   });
 
+  console.log("navegando para o video");
+  await page.goto(videoURL);
+  console.log("navegado, carregando video");
+  await cookiePromise;
+
   const url = page.url();
-  console.log("navigated, url", url);
+  console.log("url", url);
 
   const videoId = new URL(videoURL).searchParams.get("v");
   console.log("video id", videoId);
@@ -176,12 +180,13 @@ async function signIn(
   page: Page,
   selectorToWaitFor: string = "#container.ytd-masthead"
 ) {
-  console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-  console.log("você tem 90 segundos para fazer login");
-  console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+  const minutes = DEFAULT_TIMEOUT / 60000;
+  console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+  console.log(`você tem ${minutes} minutos para fazer login`);
+  console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
-  await page.waitForSelector(selectorToWaitFor, { timeout: 90000 });
-  console.log("logado in :)");
+  await page.waitForSelector(selectorToWaitFor);
+  console.log("logado :)");
 
   setCookies("auth", await page.context().cookies());
 }
