@@ -1,4 +1,4 @@
-#!/usr/bin/env node --max_old_space_size=8192 node_modules/ts-node/dist/bin.js
+#!/usr/bin/env node --max_old_space_size=8192
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var pw_1 = require("./pw");

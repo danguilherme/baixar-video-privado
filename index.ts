@@ -1,4 +1,4 @@
-#!/usr/bin/env node --max_old_space_size=8192 node_modules/ts-node/dist/bin.js
+#!/usr/bin/env node --max_old_space_size=8192
 import { getCookiesAndDownloadVideo } from "./pw";
 
 const [runner, executable, ...args] = process.argv;
