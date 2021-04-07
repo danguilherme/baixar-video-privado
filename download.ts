@@ -63,8 +63,7 @@ function download(video: any, output: string) {
     video.on("progress", (chunkLength, downloaded, total) => {
       if (progressBar === null) {
         progressBar = new cliProgress.SingleBar({
-          format:
-            `${outputName} |` + "{bar}" + "| {percentage}% || {value}/{total}",
+          format: `${outputName} [{bar}] {percentage}% | {value}/{total}`,
           barCompleteChar: "\u2588",
           barIncompleteChar: "\u2591",
           hideCursor: true,
@@ -91,7 +90,7 @@ function download(video: any, output: string) {
       progressBar.stop();
       progressBar = null;
 
-      console.log("saved to", outputName);
+      console.log("video salvo em", outputPath);
       resolve(undefined);
     });
 
