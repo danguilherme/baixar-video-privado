@@ -75,7 +75,6 @@ function getVideoInformation(videoURL) {
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0: return [4 /*yield*/, playwright_1.firefox.launch({
-                        args: ['-width=800', '-height=600'],
                         headless: false,
                     })];
                 case 1:
@@ -111,16 +110,20 @@ function getVideoInformation(videoURL) {
                     return [4 /*yield*/, cookiePromise];
                 case 8:
                     _c.sent();
+                    console.log("");
+                    console.log("INFOS");
                     url = page.url();
-                    console.log("url", url);
+                    console.log("url     :", url);
                     videoId = new URL(videoURL).searchParams.get("v");
-                    console.log("video id", videoId);
+                    console.log("video id:", videoId);
                     return [4 /*yield*/, page.evaluate(function () {
                             return window.ytcfg.get("ID_TOKEN");
                         })];
                 case 9:
                     idToken = _c.sent();
-                    console.log("ID_TOKEN", idToken);
+                    console.log("ID_TOKEN:", idToken);
+                    console.log("");
+                    console.log("Fechando o Firefox");
                     browser.close();
                     return [2 /*return*/, {
                             url: videoURL,

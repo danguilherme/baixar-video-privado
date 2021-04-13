@@ -94,12 +94,16 @@ function download(video, output) {
         console.log("baixando", outputName, "em", outputDir);
         var outputPath = path_1.default.resolve(outputDir, outputName);
         // const video = ytdl(videoID, { requestOptions });
+        var lastPrintTime = null;
+        var PRINT_EVERY = 5000; /* 5 seconds */
         video.on("progress", function (chunkLength, downloaded, total) {
             var percent = downloaded / total;
-            if ((percent < 0.05 && percent % 0.01 === 0) || percent % 0.05 === 0) {
+            var now = +new Date();
+            if (lastPrintTime === null || now > lastPrintTime + PRINT_EVERY) {
+                lastPrintTime = +new Date();
                 var downloadedPretty = pretty_bytes_1.default(downloaded);
                 var totalPretty = pretty_bytes_1.default(total);
-                console.log("downloading", (percent * 100).toFixed(1) + "% [ " + downloadedPretty + " / " + totalPretty + " ]");
+                console.log("baixando:", (percent * 100).toFixed(1) + "% [" + downloadedPretty + " / " + totalPretty + "]");
             }
         });
         video.on("error", function (error) {

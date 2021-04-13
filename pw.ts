@@ -35,7 +35,6 @@ export async function getCookiesAndDownloadVideo(
 
 async function getVideoInformation(videoURL: string) {
   const browser = await firefox.launch({
-    args: ['-width=800', '-height=600'],
     headless: false,
   });
 
@@ -62,17 +61,22 @@ async function getVideoInformation(videoURL: string) {
   console.log("navegado, carregando video");
   await cookiePromise;
 
+  console.log("");
+
+  console.log("INFOS")
   const url = page.url();
-  console.log("url", url);
+  console.log("url     :", url);
 
   const videoId = new URL(videoURL).searchParams.get("v");
-  console.log("video id", videoId);
+  console.log("video id:", videoId);
 
   const idToken = await page.evaluate<string>(() =>
     (window as any).ytcfg.get("ID_TOKEN")
   );
-  console.log("ID_TOKEN", idToken);
+  console.log("ID_TOKEN:", idToken);
 
+  console.log("");
+  console.log("Fechando o Firefox");
   browser.close();
 
   return {

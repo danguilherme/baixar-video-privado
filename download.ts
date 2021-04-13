@@ -60,16 +60,22 @@ function download(video: any, output: string) {
     const outputPath = path.resolve(outputDir, outputName);
     // const video = ytdl(videoID, { requestOptions });
 
+    let lastPrintTime: null | number = null;
+    const PRINT_EVERY = 5000; /* 5 seconds */
+
     video.on("progress", (chunkLength, downloaded, total) => {
       const percent = downloaded / total;
-      if ((percent < 0.05 && percent % 0.01 === 0) || percent % 0.05 === 0) {
+      const now = +new Date();
+      if (lastPrintTime === null || now > lastPrintTime + PRINT_EVERY) {
+        lastPrintTime = +new Date();
+
         const downloadedPretty = prettyBytes(downloaded);
         const totalPretty = prettyBytes(total);
         console.log(
-          "downloading",
+          "baixando:",
           `${(percent * 100).toFixed(
             1
-          )}% [ ${downloadedPretty} / ${totalPretty} ]`
+          )}% [${downloadedPretty} / ${totalPretty}]`
         );
       }
     });
