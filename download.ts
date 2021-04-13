@@ -1,4 +1,4 @@
-import cliProgress from "cli-progress";
+import prettyBytes from "pretty-bytes";
 import fs from "fs";
 import path from "path";
 import ytdl from "ytdl-core";
@@ -60,38 +60,29 @@ function download(video: any, output: string) {
     const outputPath = path.resolve(outputDir, outputName);
     // const video = ytdl(videoID, { requestOptions });
 
-    let progressBar: cliProgress.SingleBar | null = null;
-
     video.on("progress", (chunkLength, downloaded, total) => {
-      if (progressBar === null) {
-        progressBar = new cliProgress.SingleBar({
-          format: `${outputName} [{bar}] {percentage}% | {value}/{total}`,
-          barCompleteChar: "\u2588",
-          barIncompleteChar: "\u2591",
-          hideCursor: true,
-        });
-        progressBar?.start(total, 0);
+      const percent = downloaded / total;
+      if ((percent < 0.05 && percent % 0.01 === 0) || percent % 0.05 === 0) {
+        const downloadedPretty = prettyBytes(downloaded);
+        const totalPretty = prettyBytes(total);
+        console.log(
+          "downloading",
+          `${(percent * 100).toFixed(
+            1
+          )}% [ ${downloadedPretty} / ${totalPretty} ]`
+        );
       }
-
-      progressBar.update(downloaded);
-
-      // const percent = downloaded / total;
-      // console.log("downloading", `${(percent * 100).toFixed(1)}%`);
     });
 
     video.on("error", (error) => {
-      progressBar.stop();
-      progressBar = null;
-
-      console.log("error", error);
-      console.log("retrying");
+      console.log("Erro:", error);
+      console.log("");
+      console.log("");
+      console.log("Tentando novamente");
       reject();
     });
 
     video.on("end", () => {
-      progressBar.stop();
-      progressBar = null;
-
       console.log("video salvo em", outputPath);
       resolve(undefined);
     });

@@ -115,7 +115,7 @@ async function goToYoutube(page: Page) {
   ]);
 
   if (state === "signed-out") {
-    console.log("not logged in");
+    console.log("nao logado");
     await page.click('a[href*="accounts.google.com/ServiceLogin"]');
     await signIn(page);
   }
@@ -127,7 +127,7 @@ async function consentIfNeeded(page: Page) {
   );
 
   if (!consentingBtn) {
-    console.log("no consent needed");
+    console.log("modal de consentimento aceita");
     return;
   }
 

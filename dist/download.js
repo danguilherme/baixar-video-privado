@@ -40,7 +40,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.downloadVideo = void 0;
-var cli_progress_1 = __importDefault(require("cli-progress"));
+var pretty_bytes_1 = __importDefault(require("pretty-bytes"));
 var fs_1 = __importDefault(require("fs"));
 var path_1 = __importDefault(require("path"));
 var ytdl_core_1 = __importDefault(require("ytdl-core"));
@@ -94,31 +94,22 @@ function download(video, output) {
         console.log("baixando", outputName, "em", outputDir);
         var outputPath = path_1.default.resolve(outputDir, outputName);
         // const video = ytdl(videoID, { requestOptions });
-        var progressBar = null;
         video.on("progress", function (chunkLength, downloaded, total) {
-            if (progressBar === null) {
-                progressBar = new cli_progress_1.default.SingleBar({
-                    format: outputName + " [{bar}] {percentage}% | {value}/{total}",
-                    barCompleteChar: "\u2588",
-                    barIncompleteChar: "\u2591",
-                    hideCursor: true,
-                });
-                progressBar === null || progressBar === void 0 ? void 0 : progressBar.start(total, 0);
+            var percent = downloaded / total;
+            if ((percent < 0.05 && percent % 0.01 === 0) || percent % 0.05 === 0) {
+                var downloadedPretty = pretty_bytes_1.default(downloaded);
+                var totalPretty = pretty_bytes_1.default(total);
+                console.log("downloading", (percent * 100).toFixed(1) + "% [ " + downloadedPretty + " / " + totalPretty + " ]");
             }
-            progressBar.update(downloaded);
-            // const percent = downloaded / total;
-            // console.log("downloading", `${(percent * 100).toFixed(1)}%`);
         });
         video.on("error", function (error) {
-            progressBar.stop();
-            progressBar = null;
-            console.log("error", error);
-            console.log("retrying");
+            console.log("Erro:", error);
+            console.log("");
+            console.log("");
+            console.log("Tentando novamente");
             reject();
         });
         video.on("end", function () {
-            progressBar.stop();
-            progressBar = null;
             console.log("video salvo em", outputPath);
             resolve(undefined);
         });

@@ -174,7 +174,7 @@ function goToYoutube(page) {
                 case 3:
                     state = _a.sent();
                     if (!(state === "signed-out")) return [3 /*break*/, 6];
-                    console.log("not logged in");
+                    console.log("nao logado");
                     return [4 /*yield*/, page.click('a[href*="accounts.google.com/ServiceLogin"]')];
                 case 4:
                     _a.sent();
@@ -196,7 +196,7 @@ function consentIfNeeded(page) {
                 case 1:
                     consentingBtn = _a.sent();
                     if (!consentingBtn) {
-                        console.log("no consent needed");
+                        console.log("modal de consentimento aceita");
                         return [2 /*return*/];
                     }
                     console.log("consenting");
