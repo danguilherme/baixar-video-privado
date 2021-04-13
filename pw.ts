@@ -35,6 +35,7 @@ export async function getCookiesAndDownloadVideo(
 
 async function getVideoInformation(videoURL: string) {
   const browser = await firefox.launch({
+    args: ['-width=800', '-height=600'],
     headless: false,
   });
 

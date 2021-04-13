@@ -75,6 +75,7 @@ function getVideoInformation(videoURL) {
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0: return [4 /*yield*/, playwright_1.firefox.launch({
+                        args: ['-width=800', '-height=600'],
                         headless: false,
                     })];
                 case 1:
